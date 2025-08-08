@@ -1,27 +1,3 @@
-"""
-Local Job Application Tracker (single-file PyQt6 app)
-
-Features:
-- Local SQLite storage for jobs and emails
-- IMAP sync to fetch job-related emails
-- Automatic naive classification into Applied/Interview/Offer/Rejected
-- Table view with search/filter, detail view, manual status edit
-- Export CSV
-
-Dependencies:
-- Python 3.9+
-- PyQt6
-
-Run:
-    pip install PyQt6
-    python job_tracker_app.py
-
-Notes:
-- For Gmail use: enable IMAP and create an App Password (do NOT use your main password).
-- This is a minimal, privacy-first local app. No cloud services.
-
-"""
-
 import sys
 import sqlite3
 import imaplib
@@ -40,7 +16,6 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
 DB_PATH = 'job_tracker.db'
 
-# -------------------- Database helpers --------------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -88,7 +63,6 @@ def upsert_job(msg_id, company, role, date_applied, status):
     if c.rowcount == 1:
         print(f'DEBUG: Inserted job {msg_id}')
     else:
-        # Update existing record if any field changed
         c.execute('''UPDATE jobs SET company = ?, role = ?, date_applied = ?, status = ?
                      WHERE msg_id = ?''', (company, role, date_applied, status, msg_id))
         print(f'DEBUG: Updated job {msg_id}')
@@ -138,7 +112,6 @@ def export_jobs_csv(path):
         for r in rows:
             writer.writerow([r[2], r[3], r[4], r[5], r[6] or ''])
 
-# -------------------- Email parsing / classification --------------------
 
 STATUS_KEYWORDS = {
     'Applied': [r'thank you for applying', r'application submitted'],
@@ -153,9 +126,7 @@ def classify_email(text):
         for p in patterns:
             if re.search(p, t):
                 return status
-    return 'Applied'  # default if ambiguous
-
-# Heuristic extractors
+    return 'Applied'  
 
 def extract_company(from_header):
     if '<' in from_header:
@@ -181,7 +152,6 @@ def extract_role(subject):
         return parts[-1].strip()
     return subject.strip()
 
-# -------------------- IMAP Worker Thread --------------------
 class ImapSyncThread(QThread):
     progress = pyqtSignal(str)
     finished = pyqtSignal(int)
@@ -268,7 +238,6 @@ class ImapSyncThread(QThread):
             print(f'DEBUG: Error: {e}')
             self.finished.emit(0)
 
-# -------------------- PyQt6 GUI --------------------
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
