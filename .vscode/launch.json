@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Job Tracker",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/job_tracker_app.py",
+        "console": "integratedTerminal"
+      }
+    ]
+  }
